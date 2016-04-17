@@ -3,11 +3,13 @@ import sys
 import os
 from os import path
 import acme_tiny
+import urllib
 
 STORE_PATH = path.dirname(path.abspath(__file__))
 USERKEY = path.join(STORE_PATH, "keys", "user.key")
-INTERMEDIATE_KEY = path.join(STORE_PATH, "keys", "intermediate.pem")
 OUT_PATH='/etc/certs'
+
+INTERMEDIATE_KEY_URL = "https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem"
 
 def sh(cmd): os.system(cmd)
 
@@ -16,6 +18,12 @@ def ask(question):
 		val = raw_input(question  + " [Y/N]: ").lower()
 		if 'y' in val: return True
 		if 'n' in val: return False
+
+def getHttp(url):
+	try:
+		f = urllib.urlopen(url)
+		return f.read()
+	except: return None
 
 def createOrRenew(domain, userkey="keys/user.key", with_www=False, interactive=False, renewalOnly=False):
 	DOMAIN_PATH=path.join(STORE_PATH, "keys", domain)
@@ -42,8 +50,11 @@ def createOrRenew(domain, userkey="keys/user.key", with_www=False, interactive=F
 		isNew = True
 
 	#Fetch intermediate
-	print "Updating intermediate certificate..."
-	sh('wget -q -O - https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem > %s' % INTERMEDIATE_KEY)
+	print "Downloading intermediate certificate..."
+	intermediateKey = getHttp(INTERMEDIATE_KEY_URL)
+	if not intermediateKey:
+		print "Failed to download intermediate certificate"
+		return False
 
 	# Check for user key
 	if not path.isfile(USERKEY):
@@ -92,7 +103,7 @@ def createOrRenew(domain, userkey="keys/user.key", with_www=False, interactive=F
 	OUT = path.join(OUT_PATH, domain + ".pem")
 
 	print "Writing full key to %s..." % OUT
-	FULL_KEY = open(KEY).read() + open(CRT).read() + open(INTERMEDIATE_KEY).read()
+	FULL_KEY = open(KEY).read() + open(CRT).read() + intermediateKey
 	open(OUT, 'w').write(FULL_KEY)
 
 	return True

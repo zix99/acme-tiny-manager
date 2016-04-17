@@ -11,7 +11,6 @@ Much like the acme-tiny script, this one requires **root permissions**.
 
 * Python 2.x
 * openssl
-* wget
 
 ## Use
 
