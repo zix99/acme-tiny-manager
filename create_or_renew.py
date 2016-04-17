@@ -7,6 +7,7 @@ import acme_tiny
 STORE_PATH = path.dirname(path.abspath(__file__))
 USERKEY = path.join(STORE_PATH, "keys", "user.key")
 INTERMEDIATE_KEY = path.join(STORE_PATH, "keys", "intermediate.pem")
+OUT_PATH='/etc/certs'
 
 def sh(cmd): os.system(cmd)
 
@@ -16,7 +17,7 @@ def ask(question):
 		if 'y' in val: return True
 		if 'n' in val: return False
 
-def createOrRenew(domain, userkey="keys/user.key", with_www=False, interactive=False):
+def createOrRenew(domain, userkey="keys/user.key", with_www=False, interactive=False, renewalOnly=False):
 	DOMAIN_PATH=path.join(STORE_PATH, "keys", domain)
 	CHALLENGE_PATH=path.join(STORE_PATH, "challenges", domain)
 	isNew = False
@@ -27,6 +28,10 @@ def createOrRenew(domain, userkey="keys/user.key", with_www=False, interactive=F
 		if not ask("Proceed?"): return False
 
 	if not path.isdir(DOMAIN_PATH):
+		if renewalOnly:
+			print "Set to renewal only, refusing to create new key"
+			return False
+
 		print "Directory not found, creating..."
 		os.mkdir(DOMAIN_PATH)
 		isNew = True
@@ -67,10 +72,13 @@ def createOrRenew(domain, userkey="keys/user.key", with_www=False, interactive=F
 	else: print "  Existing CSR found."
 
 	if isNew and interactive:
+		print
 		print "At this point, make sure your web server is correctly set up"
 		print "to point the the challenge directory:"
-		print CHALLENGE_PATH
-		raw_input("[Press enter to continue]")
+
+		print "http://%s/.well-known/acme-challenge/ -> %s" % (domain, CHALLENGE_PATH)
+		try: raw_input("[Press enter to continue]")
+		except: return False
 
 	# Create certificate
 	try:
@@ -81,7 +89,7 @@ def createOrRenew(domain, userkey="keys/user.key", with_www=False, interactive=F
 		return False
 
 	# Concat and output certs to /etc/certs
-	OUT = "/etc/certs/" + domain + ".pem"
+	OUT = path.join(OUT_PATH, domain + ".pem")
 
 	print "Writing full key to %s..." % OUT
 	FULL_KEY = open(KEY).read() + open(CRT).read() + open(INTERMEDIATE_KEY).read()

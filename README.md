@@ -27,15 +27,55 @@ It will generate your user key, domain key, and domain csr in the `keys` folder.
 When asked to setup, create a route on your server to server files for `/.well-known/acme-challenge/` to
 `/chalenges/*your domain*`.
 
+eg, for nginx, your config might look like this:
+```
+# Normal HTTP redirect to SSL
+server {
+        listen 80;
+        server_name example.com;
+
+        # This is where it'll read the challenges from
+        location /.well-known/acme-challenge/ {
+                alias /path/to/challenges/example.com/;
+                try_files $uri =404;
+        }
+        # Redirect to https
+        location / {
+                return 301 https://example.com;
+        }
+}
+
+
+# The SSLd site
+server {
+        listen 443 ssl;
+        server_name example.com;
+
+        ssl_certificate /etc/certs/example.com.pem;
+        ssl_certificate_key /etc/certs/example.com.pem;
+
+        # Replace below with your normal config
+        root /path/to/content;
+        index index.html;
+}
+```
+
 Continue the script.  Validation will occur, and you will get a crt.  The key, the crt, and the intermediate file
 will be joined and output to `/etc/certs/*domain*.pem`
 
 ### Renewals
 
-Set up a cron job to run `renew_all` monthly.
+Set up a cron job to run `renew_all.py` monthly.
 
-This script goes through each key-folder in `keys/`, and will call `create_or_renew` on them.
+This script goes through each key-folder in `keys/`, and will call `renew` on them, outputting a new
+key to `/etc/certs` if successful.
 
+Make sure to reload your web server after the renewal script completes successfully.
+
+eg, your crontab might look like this:
+```
+0 0 1 * * /path/to/renew_all.py && service nginx reload
+```
 
 # License
 
