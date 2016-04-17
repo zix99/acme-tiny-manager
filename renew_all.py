@@ -3,7 +3,7 @@ import os, sys
 from os import path
 from create_or_renew import createOrRenew
 
-BASE_PATH = path.basedir(bath.abspath(__file__))
+BASE_PATH = path.dirname(path.abspath(__file__))
 KEY_PATH = path.join(BASE_PATH, "keys")
 
 failures = 0
