@@ -93,7 +93,8 @@ def createOrRenew(domain, userkey="keys/user.key", with_www=False, interactive=F
 
 	# Create certificate
 	try:
-		acme_tiny.get_crt(USERKEY, CSR, CHALLENGE_PATH)
+		crtData = acme_tiny.get_crt(USERKEY, CSR, CHALLENGE_PATH)
+		open(CRT, 'w').write(crtData)
 	except Exception as e:
 		print "Error getting certificate"
 		print e
