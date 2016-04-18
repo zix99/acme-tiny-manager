@@ -1,7 +1,7 @@
 
 # ACME-Tiny Certificate manager
 
-This certificate manager wraps the [acme-tiny](https://github.com/diafygi/acme-tiny/) script to manage keys in `/etc/certs` and provide
+This certificate manager wraps the [acme-tiny](https://github.com/diafygi/acme-tiny/) script to manage keys in `certs/` and provide
 the tooling to keep the keys up to date.
 
 Much like the acme-tiny script, this one requires **root permissions**.
@@ -50,8 +50,8 @@ server {
         listen 443 ssl;
         server_name example.com;
 
-        ssl_certificate /etc/certs/example.com.pem;
-        ssl_certificate_key /etc/certs/example.com.pem;
+        ssl_certificate /path/to/certs/example.com.pem;
+        ssl_certificate_key /path/to/certs/example.com.pem;
 
         # Replace below with your normal config
         root /path/to/content;
@@ -60,14 +60,14 @@ server {
 ```
 
 Continue the script.  Validation will occur, and you will get a crt.  The key, the crt, and the intermediate file
-will be joined and output to `/etc/certs/*domain*.pem`
+will be joined and output to `/path/to/certs/*domain*.pem`
 
 ### Renewals
 
 Set up a cron job to run `renew_all.py` monthly.
 
 This script goes through each key-folder in `keys/`, and will call `renew` on them, outputting a new
-key to `/etc/certs` if successful.
+key to `/path/to/certs` if successful.
 
 Make sure to reload your web server after the renewal script completes successfully.
 

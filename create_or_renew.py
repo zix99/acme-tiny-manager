@@ -7,7 +7,7 @@ import urllib
 
 STORE_PATH = path.dirname(path.abspath(__file__))
 USERKEY = path.join(STORE_PATH, "keys", "user.key")
-OUT_PATH='/etc/certs'
+OUT_PATH = path.join(STORE_PATH, 'certs')
 
 INTERMEDIATE_KEY_URL = "https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem"
 
@@ -101,6 +101,9 @@ def createOrRenew(domain, userkey="keys/user.key", with_www=False, interactive=F
 		return False
 
 	# Concat and output certs to /etc/certs
+	if not path.isdir(OUT_PATH):
+		os.mkdir(OUT_PATH)
+
 	OUT = path.join(OUT_PATH, domain + ".pem")
 
 	print "Writing full key to %s..." % OUT
