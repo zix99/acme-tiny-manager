@@ -4,7 +4,7 @@
 This certificate manager wraps the [acme-tiny](https://github.com/diafygi/acme-tiny/) script to manage keys in `certs/` and provide
 the tooling to keep the keys up to date.
 
-Much like the acme-tiny script, this one requires **root permissions**.
+Much like the acme-tiny script, this one requires **access to your private keys**.
 
 
 ## Dependencies
@@ -24,7 +24,7 @@ own on the server that is setup to use the domain.
 It will generate your user key, domain key, and domain csr in the `keys` folder.
 
 When asked to setup, create a route on your server to server files for `/.well-known/acme-challenge/` to
-`/chalenges/*your domain*`.
+`/challenges/*your domain*`.
 
 eg, for nginx, your config might look like this:
 ```
